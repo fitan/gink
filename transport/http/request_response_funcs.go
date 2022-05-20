@@ -130,4 +130,6 @@ const (
 	// ContextKeyResponseSize is populated in the context whenever a
 	// ServerFinalizerFunc is specified. Its value is of type int64.
 	ContextKeyResponseSize
+
+	ContextKeyResponseDebug
 )
