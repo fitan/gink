@@ -74,7 +74,7 @@ const (
 	// PopulateRequestContext. Its value is r.Method.
 	ContextKeyRequestMethod contextKey = iota
 
-	ContextKeyResponseDebug
+	ContextKeyRequestDebug
 
 	// ContextKeyRequestURI is populated in the context by
 	// PopulateRequestContext. Its value is r.RequestURI.
