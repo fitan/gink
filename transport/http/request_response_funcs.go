@@ -74,6 +74,8 @@ const (
 	// PopulateRequestContext. Its value is r.Method.
 	ContextKeyRequestMethod contextKey = iota
 
+	ContextKeyResponseDebug
+
 	// ContextKeyRequestURI is populated in the context by
 	// PopulateRequestContext. Its value is r.RequestURI.
 	ContextKeyRequestURI
@@ -130,6 +132,4 @@ const (
 	// ContextKeyResponseSize is populated in the context whenever a
 	// ServerFinalizerFunc is specified. Its value is of type int64.
 	ContextKeyResponseSize
-
-	ContextKeyResponseDebug
 )
