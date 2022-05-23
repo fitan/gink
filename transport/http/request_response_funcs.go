@@ -51,6 +51,7 @@ func PopulateRequestContext(ctx context.Context, r *gin.Context) context.Context
 		ContextKeyRequestMethod:          r.Request.Method,
 		ContextKeyRequestURI:             r.Request.RequestURI,
 		ContextKeyRequestPath:            r.Request.URL.Path,
+		ContextKeyRequestFullPath:        r.FullPath(),
 		ContextKeyRequestProto:           r.Request.Proto,
 		ContextKeyRequestHost:            r.Request.Host,
 		ContextKeyRequestRemoteAddr:      r.Request.RemoteAddr,
@@ -83,6 +84,8 @@ const (
 	// ContextKeyRequestPath is populated in the context by
 	// PopulateRequestContext. Its value is r.URL.Path.
 	ContextKeyRequestPath
+
+	ContextKeyRequestFullPath
 
 	// ContextKeyRequestProto is populated in the context by
 	// PopulateRequestContext. Its value is r.Proto.
