@@ -9,7 +9,7 @@ require (
 	google.golang.org/protobuf v1.28.0
 )
 
-require go.opentelemetry.io/otel/trace v1.7.0
+require go.opentelemetry.io/otel/trace v0.20.0
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -26,7 +26,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
-	go.opentelemetry.io/otel v1.7.0 // indirect
+	go.opentelemetry.io/otel v0.20.0 // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272 // indirect
 	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
