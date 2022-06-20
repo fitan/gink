@@ -43,6 +43,45 @@ func SetRequestHeader(key, val string) RequestFunc {
 	}
 }
 
+const (
+	KeyRequestMethod          = "KeyRequestMethod"
+	KeyRequestURI             = "KeyRequestURI"
+	KeyRequestPath            = "KeyRequestPath"
+	KeyRequestFullPath        = "KeyRequestFullPath"
+	KeyRequestProto           = "KeyRequestProto"
+	KeyRequestHost            = "KeyRequestHost"
+	KeyRequestRemoteAddr      = "KeyRequestRemoteAddr"
+	KeyRequestXForwardedFor   = "KeyRequestXForwardedFor"
+	KeyRequestXForwardedProto = "KeyRequestXForwardedProto"
+	KeyRequestAuthorization   = "KeyRequestAuthorization"
+	KeyRequestReferer         = "KeyRequestReferer"
+	KeyRequestUserAgent       = "KeyRequestUserAgent"
+	KeyRequestXRequestID      = "KeyRequestXRequestID"
+	KeyRequestAccept          = "KeyRequestAccept"
+)
+
+func PopulateRequestGinKey(ctx context.Context, r *gin.Context) context.Context {
+	for k, v := range map[string]string{
+		KeyRequestMethod:          r.Request.Method,
+		KeyRequestURI:             r.Request.RequestURI,
+		KeyRequestPath:            r.Request.URL.Path,
+		KeyRequestFullPath:        r.FullPath(),
+		KeyRequestProto:           r.Request.Proto,
+		KeyRequestHost:            r.Request.Host,
+		KeyRequestRemoteAddr:      r.Request.RemoteAddr,
+		KeyRequestXForwardedFor:   r.GetHeader("X-Forwarded-For"),
+		KeyRequestXForwardedProto: r.GetHeader("X-Forwarded-Proto"),
+		KeyRequestAuthorization:   r.GetHeader("Authorization"),
+		KeyRequestReferer:         r.GetHeader("Referer"),
+		KeyRequestUserAgent:       r.GetHeader("User-Agent"),
+		KeyRequestXRequestID:      r.GetHeader("X-Request-Id"),
+		KeyRequestAccept:          r.GetHeader("Accept"),
+	} {
+		r.Set(k, v)
+	}
+	return ctx
+}
+
 // PopulateRequestContext is a RequestFunc that populates several values into
 // the context from the HTTP request. Those values may be extracted using the
 // corresponding ContextKey type in this package.

@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/transport"
 	"github.com/go-kit/log"
+	"go.opentelemetry.io/otel/trace"
 	"net/http"
 )
 
@@ -161,11 +162,10 @@ func NopRequestDecoder(ctx context.Context, context2 *gin.Context) (interface{},
 // will be applied to the response. If the response implements StatusCoder, the
 // provided StatusCode will be used instead of 200.
 func EncodeJSONResponse(_ context.Context, gCtx *gin.Context, response interface{}) error {
-	gCtx.Header("Content-Type", "application/json; charset=utf-8")
 	if headerer, ok := response.(Headerer); ok {
 		for k, values := range headerer.Headers() {
 			for _, v := range values {
-				gCtx.Header(k,v)
+				gCtx.Header(k, v)
 			}
 		}
 	}
@@ -173,12 +173,37 @@ func EncodeJSONResponse(_ context.Context, gCtx *gin.Context, response interface
 	if sc, ok := response.(StatusCoder); ok {
 		code = sc.StatusCode()
 	}
-	gCtx.Writer.WriteHeader(code)
+
 	if code == http.StatusNoContent {
 		return nil
 	}
 
-	return json.NewEncoder(gCtx.Writer).Encode(response)
+	gCtx.JSON(code, response)
+	return nil
+}
+
+func EncodeJSONFormatResponse(ctx context.Context, gCtx *gin.Context, response interface{}) error {
+	if headerer, ok := response.(Headerer); ok {
+		for k, values := range headerer.Headers() {
+			for _, v := range values {
+				gCtx.Header(k, v)
+			}
+		}
+	}
+	code := http.StatusOK
+	if sc, ok := response.(StatusCoder); ok {
+		code = sc.StatusCode()
+	}
+
+	if code == http.StatusNoContent {
+		return nil
+	}
+	gCtx.JSON(http.StatusOK, gin.H{
+		"code":    code,
+		"data":    response,
+		"traceId": trace.SpanFromContext(ctx).SpanContext().TraceID().String(),
+	})
+	return nil
 }
 
 // DefaultErrorEncoder writes the error to the ResponseWriter, by default a
@@ -199,7 +224,7 @@ func DefaultErrorEncoder(_ context.Context, err error, gCtx *gin.Context) {
 	if headerer, ok := err.(Headerer); ok {
 		for k, values := range headerer.Headers() {
 			for _, v := range values {
-				gCtx.Header(k,v)
+				gCtx.Header(k, v)
 			}
 		}
 	}
