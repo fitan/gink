@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/go-resty/resty/v2"
 )
 
 // RequestFunc may take information from an HTTP request and put it into a
@@ -19,7 +20,7 @@ type ServerResponseFunc func(context.Context, *gin.Context) context.Context
 // ClientResponseFunc may take information from an HTTP request and make the
 // response available for consumption. ClientResponseFuncs are only executed in
 // clients, after a request has been made, but prior to it being decoded.
-type ClientResponseFunc func(context.Context, *gin.Context) context.Context
+type RestyResponseFunc func(context.Context, *resty.Response) context.Context
 
 // SetContentType returns a ServerResponseFunc that sets the Content-Type header
 // to the provided value.

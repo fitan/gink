@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/go-resty/resty/v2"
 	"net/http"
 )
 
@@ -35,3 +36,12 @@ type EncodeResponseFunc func(context.Context, *gin.Context, interface{}) error
 // endpoints. One straightforward DecodeResponseFunc could be something that
 // JSON decodes from the response body to the concrete response type.
 type DecodeResponseFunc func(context.Context, *gin.Context) (response interface{}, err error)
+
+
+type RestyEncodeRequestFunc func(context.Context, *resty.Request, interface{}) error
+
+type RestyCreateRequestFunc func(context.Context, interface{}) (*resty.Request, error)
+
+type RestyDecodeResponseFunc func(context.Context, *resty.Response) (response interface{}, err error)
+
+type RestyRequestFunc func(context.Context, *resty.Request) context.Context
