@@ -17,7 +17,7 @@ type Client struct {
 	client *resty.Client
 }
 
-func (c *Client) Endpoint(url UrlOption, enc RestyEncodeRequestFunc, dec RestyDecodeResponseFunc, options ...RequestOption) endpoint.Endpoint {
+func (c *Client) Endpoint(url ReqOption, enc RestyEncodeRequestFunc, dec RestyDecodeResponseFunc, options ...RequestOption) endpoint.Endpoint {
 	r := c.client.R()
 	url(r)
 	request := &Request{
@@ -102,8 +102,6 @@ func (r *Request) Endpoint() endpoint.Endpoint {
 	}
 }
 
-type NewEndpointFunc func(method string, url string, enc RestyEncodeRequestFunc, dec RestyDecodeResponseFunc, options ...ClientOption) endpoint.Endpoint
-
 // NewClient constructs a usable Client for a single remote method.
 func NewClient(client *resty.Client, options ...ClientOption) *Client {
 	c := &Client{
@@ -117,11 +115,11 @@ func NewClient(client *resty.Client, options ...ClientOption) *Client {
 }
 
 // ClientOption sets an optional parameter for clients.
-type ClientOption func(*Client)
+type ClientOption func(client *Client)
 
 type RequestOption func(request *Request)
 
-type UrlOption func(request *resty.Request)
+type ReqOption func(request *resty.Request)
 
 func SetClientDebug(b bool) ClientOption {
 	return func(client *Client) {
@@ -129,49 +127,13 @@ func SetClientDebug(b bool) ClientOption {
 	}
 }
 
-func SetUrl(method string, url string, options ...UrlOption) UrlOption {
+func Req(method string, url string, options ...ReqOption) ReqOption {
 	return func(r *resty.Request) {
 		r.URL = url
 		r.Method = method
 		for _, option := range options {
 			option(r)
 		}
-	}
-}
-
-func SetHeader(header string, value string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetHeader(header, value)
-	}
-}
-
-func SetHeaders(headers map[string]string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetHeaders(headers)
-	}
-}
-
-func SetPathParam(param string, value string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetPathParam(param, value)
-	}
-}
-
-func SetPathParams(params map[string]string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetPathParams(params)
-	}
-}
-
-func SetQueryParam(param string, value string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetQueryParam(param, value)
-	}
-}
-
-func SetQueryParams(params map[string]string) UrlOption {
-	return func(r *resty.Request) {
-		r.SetQueryParams(params)
 	}
 }
 
@@ -203,6 +165,7 @@ type ClientFinalizerFunc func(ctx context.Context, err error)
 
 func EncodeJSONRequest(c context.Context, r *resty.Request, request interface{}) error {
 	r.SetBody(request)
+	r.SetContext(c)
 	return nil
 }
 
@@ -242,8 +205,6 @@ func DecodeJSONResponse(i interface{}) RestyDecodeResponseFunc {
 		return resp, nil
 	}
 }
-
-type createRestyCreateRequestFunc func(req *resty.Request, enc RestyEncodeRequestFunc) RestyCreateRequestFunc
 
 func makeCreateRequestFunc(req *resty.Request, enc RestyEncodeRequestFunc) RestyCreateRequestFunc {
 	return func(ctx context.Context, i interface{}) (*resty.Request, error) {

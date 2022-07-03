@@ -1,15 +1,12 @@
 package http
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/go-resty/resty/v2"
 	"net"
-	"os"
 	"time"
 )
 
-type TraceInfo struct {
+type DebugInfo struct {
 	Response ResponseInfo `json:"response,omitempty"`
 
 	Request RequestInfo `json:"request,omitempty"`
@@ -32,18 +29,18 @@ type ResponseInfo struct {
 }
 
 type Info struct {
-	DNSLookup      time.Duration `json:"dns_lookup"`
-	ConnTime       time.Duration `json:"conn_time"`
-	TCPConnTime    time.Duration `json:"tcp_conn_time"`
-	TLSHandshake   time.Duration `json:"tls_handshake"`
-	ServerTime     time.Duration `json:"server_time"`
-	ResponseTime   time.Duration `json:"response_time"`
-	TotalTime      time.Duration `json:"total_time"`
-	IsConnReused   bool          `json:"is_conn_reused"`
-	IsConnWasIdle  bool          `json:"is_conn_was_idle"`
-	ConnIdleTime   time.Duration `json:"conn_idle_time"`
-	RequestAttempt int           `json:"request_attempt"`
-	RemoteAddr     net.Addr      `json:"remote_addr"`
+	DNSLookup      string   `json:"dns_lookup"`
+	ConnTime       string   `json:"conn_time"`
+	TCPConnTime    string   `json:"tcp_conn_time"`
+	TLSHandshake   string   `json:"tls_handshake"`
+	ServerTime     string   `json:"server_time"`
+	ResponseTime   string   `json:"response_time"`
+	TotalTime      string   `json:"total_time"`
+	IsConnReused   bool     `json:"is_conn_reused"`
+	IsConnWasIdle  bool     `json:"is_conn_was_idle"`
+	ConnIdleTime   string   `json:"conn_idle_time"`
+	RequestAttempt int      `json:"request_attempt"`
+	RemoteAddr     net.Addr `json:"remote_addr"`
 }
 
 func SetResponse(resp *resty.Response) ResponseInfo {
@@ -66,35 +63,17 @@ func SetRequest(req *resty.Request) RequestInfo {
 
 func SetInfo(traceInfo resty.TraceInfo) Info {
 	return Info{
-		DNSLookup:      traceInfo.DNSLookup,
-		ConnTime:       traceInfo.ConnTime,
-		TCPConnTime:    traceInfo.TCPConnTime,
-		TLSHandshake:   traceInfo.TLSHandshake,
-		ServerTime:     traceInfo.ServerTime,
-		ResponseTime:   traceInfo.ResponseTime,
-		TotalTime:      traceInfo.TotalTime,
+		DNSLookup:      traceInfo.DNSLookup.Truncate(time.Millisecond).String(),
+		ConnTime:       traceInfo.ConnTime.Truncate(time.Millisecond).String(),
+		TCPConnTime:    traceInfo.TCPConnTime.Truncate(time.Millisecond).String(),
+		TLSHandshake:   traceInfo.TLSHandshake.Truncate(time.Millisecond).String(),
+		ServerTime:     traceInfo.ServerTime.Truncate(time.Millisecond).String(),
+		ResponseTime:   traceInfo.ResponseTime.Truncate(time.Millisecond).String(),
+		TotalTime:      traceInfo.TotalTime.Truncate(time.Millisecond).String(),
 		IsConnReused:   traceInfo.IsConnReused,
 		IsConnWasIdle:  traceInfo.IsConnWasIdle,
-		ConnIdleTime:   traceInfo.ConnIdleTime,
+		ConnIdleTime:   traceInfo.ConnIdleTime.Truncate(time.Millisecond).String(),
 		RequestAttempt: traceInfo.RequestAttempt,
 		RemoteAddr:     traceInfo.RemoteAddr,
-	}
-}
-
-func WithTrace() RequestOption {
-	return func(request *Request) {
-		request.before = append(request.before, func(ctx context.Context, req *resty.Request) context.Context {
-			req.EnableTrace()
-			return ctx
-		})
-		request.after = append(request.after, func(ctx context.Context, resp *resty.Response) context.Context {
-			info := TraceInfo{
-				Response: SetResponse(resp),
-				Request:  SetRequest(resp.Request),
-				Info:     SetInfo(resp.Request.TraceInfo()),
-			}
-			_ = json.NewEncoder(os.Stdout).Encode(info)
-			return ctx
-		})
 	}
 }
